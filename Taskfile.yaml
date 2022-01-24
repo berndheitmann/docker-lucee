@@ -1,0 +1,58 @@
+# https://taskfile.dev
+
+version: '3'
+
+vars:
+  PROJECT_NAME: docker-lucee
+
+tasks:
+
+  build:
+    desc: Container-Image bauen
+    cmds:
+      - cmd: docker build --rm -t {{.PROJECT_NAME}}:latest --pull .
+
+  run:
+    desc: Container starten
+    deps: [remove]
+    cmds:
+      - cmd: docker run -d --name {{.PROJECT_NAME}} -p 3005:80 {{.PROJECT_NAME}}
+
+  run-sleep:
+    desc: Container mit sleep Prozess starten
+    cmds:
+      - cmd: docker stop {{.PROJECT_NAME}}-sleep
+        ignore_error: true
+      - cmd: docker rm {{.PROJECT_NAME}}-sleep
+        ignore_error: true
+      - cmd: docker run -d --name {{.PROJECT_NAME}}-sleep -p 3001:3000 {{.PROJECT_NAME}} sleep infinity
+
+
+  remove:
+    desc: Container entfernen
+    deps: [stop]
+    cmds:
+      - cmd: docker rm {{.PROJECT_NAME}}
+        ignore_error: true
+
+  stop:
+    desc: Container stoppen
+    cmds:
+      - cmd: docker stop {{.PROJECT_NAME}}
+        ignore_error: true
+
+  exec:
+    cmds:
+      - cmd: docker exec -it {{.PROJECT_NAME}} /bin/bash
+
+  exec-sleep:
+    cmds:
+      - cmd: docker exec -it {{.PROJECT_NAME}}-sleep /bin/bash
+
+  run-dev:
+    cmds:
+      - cmd: docker stop {{.PROJECT_NAME}}-dev
+        ignore_error: true
+      - cmd: docker rm {{.PROJECT_NAME}}-dev
+        ignore_error: true
+      - cmd: docker run -d --name {{.PROJECT_NAME}}-dev -p 3002:3000 --mount type=bind,source="$(pwd)",target=/usr/src/app {{.PROJECT_NAME}}
