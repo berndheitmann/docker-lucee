@@ -2,9 +2,13 @@ FROM ubuntu:20.04
 
 LABEL org.medatixx.image.authors="thomas.schramm@medatixx.de"
 
-ENV TZ=Europe/Berlin
-ENV TERM xterm
-ENV LUCEE lucee-express-5.3.8.206.zip
+ARG LUCEE_VERSION="5.3.8.206" \
+    URLREWIRTER_VERSION="4.0.3"
+
+ENV TZ=Europe/Berlin \
+    TERM=xterm \
+    LUCEE=lucee-express-${LUCEE_VERSION}}.zip
+    
 
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime \
     && echo $TZ > /etc/timezone \
@@ -49,7 +53,7 @@ RUN mkdir /opt/lucee && cd /opt/lucee \
     && echo "password" > ./server/lucee-server/context/password.txt
 
 # Install Tuckey UrlRewriteFilter
-RUN curl --location 'https://search.maven.org/remotecontent?filepath=org/tuckey/urlrewritefilter/4.0.3/urlrewritefilter-4.0.3.jar' -o /opt/lucee/lib/urlrewritefilter-4.0.3.jar
+RUN curl --location 'https://search.maven.org/remotecontent?filepath=org/tuckey/urlrewritefilter/${URLREWIRTER_VERSION}/urlrewritefilter-${URLREWIRTER_VERSION}.jar' -o /opt/lucee/lib/urlrewritefilter-${URLREWIRTER_VERSION}.jar
 
 # Cleanup
 RUN apt-get autoremove -y \
